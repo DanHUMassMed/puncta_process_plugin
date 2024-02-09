@@ -135,7 +135,7 @@ class Puncta_Process implements PlugIn{
             def (directoryRoot, fluorescences, processValues, processArgs) = options
             def debugLogger = GLLogger.getLogger("debug", directoryRoot)
             /******************* LOGGER LEVEL *************************/
-            debugLogger.setLevel(GLLogger.LogLevel.TRACE)
+            debugLogger.setLevel(GLLogger.LogLevel.DEBUG)
             def logger = GLLogger.getLogger("log", directoryRoot)
             def startTime = new Date()
             logger.log("Started at: "+startTime.format('yyyy-MM-dd_HH:mm:ss')+"  | In Dir: "+directoryRoot )
