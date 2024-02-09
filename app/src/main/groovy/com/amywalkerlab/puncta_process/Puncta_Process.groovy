@@ -34,11 +34,11 @@ class Puncta_Process implements PlugIn{
     @Override
 	public void run(String arg) {
         runPipeline() 
-        IJ.showMessage("Run Completed")
+        IJ.showMessage("Poncta Process Run Completed.")
 	}
 
     def getOptions() {
-        def gd = new GenericDialog("Pipeline - Image Process v1.4")
+        def gd = new GenericDialog("Pipeline - Puncta Process v0.1.1")
         def messageFont = new Font("Arial", Font.BOLD, 14)
         gd.addMessage(PlugInConstants.START_MESSAGE,messageFont)
 
