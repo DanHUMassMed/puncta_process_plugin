@@ -34,7 +34,7 @@ class Puncta_Process implements PlugIn{
     @Override
 	public void run(String arg) {
         runPipeline() 
-        IJ.showMessage("Poncta Process Run Completed.")
+        IJ.showMessage("Puncta Process Run Completed.")
 	}
 
     def getOptions() {
