@@ -28,7 +28,7 @@ abstract class ProcessDirectory {
         
         // Check if the input directory exists if it does, make the output directory if needed.
         def directoryExists = new File(inputDir).isDirectory()
-
+    
 		if (!directoryExists) {
     		IJ.error("Error", "Input Directory '$inputDir' does not exist.")
 		} else {
@@ -38,6 +38,7 @@ abstract class ProcessDirectory {
 
     // Process all the files in the provided directory
     public void processDirectory() {
+        logger.log("processDirectory $inputDir")
         def list = (new File(inputDir)).listFiles()
         
         list.each { file ->        
@@ -45,6 +46,7 @@ abstract class ProcessDirectory {
                 processDirectory(file)
             }
             
+            logger.log("file.name " + file.name)
             if (file.name.endsWith(suffix)) {
                 processFile(file)
             }

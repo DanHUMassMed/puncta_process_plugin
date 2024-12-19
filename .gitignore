@@ -1,6 +1,7 @@
 # Ignore Gradle project-specific cache directory
 .gradle
 /app/build
+/app/bin
 
 # Files to ignore
 .DS_Store

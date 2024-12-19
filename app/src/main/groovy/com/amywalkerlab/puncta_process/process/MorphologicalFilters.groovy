@@ -19,6 +19,7 @@ class MorphologicalFilters extends ProcessDirectory {
 	    def String file_name = file.name
 	    def ImagePlus imp = IJ.openImage(full_name)
 		//imp.show()
+		logger.log("processFile " + file.name)
 	    IJ.run(imp, "Morphological Filters (3D)", args)
 	    def wth_imp = getWhiteTopHatImage()
 	    if (wth_imp != null) {
@@ -30,7 +31,17 @@ class MorphologicalFilters extends ProcessDirectory {
 		imp.close()
 	}
 	
-	
+	def extractOperationValue(String inputString) {
+		// Use a regular expression to find the word inside the square brackets following "operation="
+		def matcher = inputString =~ /operation=\[(.*?)\]/
+		
+		if (matcher) {
+			return matcher[0][1]  // Return the first match group (the word inside the brackets)
+		} else {
+			return null  // Return null if no match is found
+		}
+	}
+
     // Iterate the active images and return the White Top Hat Image
 	// Assume there is only one White Top Hat Image as we close them after processing
 	private ImagePlus getWhiteTopHatImage() {
@@ -38,7 +49,8 @@ class MorphologicalFilters extends ProcessDirectory {
 	    WindowManager.getIDList().each { id ->
 	        def imp = WindowManager.getImage((int) id)
 	    	def title = imp.getTitle()
-	    	if (title.contains("White Top Hat")) {
+			def title_prefix = extractOperationValue(this.args)
+	    	if (title.contains(title_prefix)) {
 	    		topHatImage = imp
 	    		return false //Stop iteration
 	    	}

@@ -133,12 +133,13 @@ class SummaryExcel {
 		def GLDataframe wormBarChartStat = null
 		
 		// Create the 3D_OC_ sheets
-		// Read all the csv files in /3D_OC_ directory and get the first column of each file
-		// This is the Object Count Column. This will give you one row for each csv
+		// Read all the csv files in /3D_OC_ directory and get the Object Count Column of each file
+		// This will give you one row for each csv
 		fluorescences.each { fluorescence ->
 		    def fluorescenceName = '3D_OC_' + fluorescence
 			def objectCountDir = directoryRoot + "/" + fluorescenceName
 			def objectCountData = readDirectoryOfObjectCountCSVs(objectCountDir)
+			
 			if (!objectCountData.isEmpty()) {
 				objectCountData = sortDataframeByCounts(objectCountData)
 				objectCountData.writeCSV(outputDir+"/"+fluorescenceName+".csv")
@@ -149,13 +150,13 @@ class SummaryExcel {
 				// Postpone writing the sheet data till later
 				objectCountDataStatsList.add([objectCountDataStats, fluorescenceName+"Stats"])
 				
-				def title = 'Mean 3d OC ' + fluorescence
-				wormBarChartStat = wormBarChart(objectCountDataStats, 'name', 'mean', 'Mean 3d OC', title, outputDir)
-				wormBarChartStats = wormBarChartStats.concat(wormBarChartStat)
+				// def title = 'Mean 3d OC ' + fluorescence
+				// wormBarChartStat = wormBarChart(objectCountDataStats, 'name', 'mean', 'Mean 3d OC', title, outputDir)
+				// wormBarChartStats = wormBarChartStats.concat(wormBarChartStat)
 				
-				title = 'Mean Counts ' + fluorescence
-				wormBarChartStat = wormBarChart(objectCountDataStats, 'name', 'numCount', 'Mean Counts', title, outputDir)
-				wormBarChartStats = wormBarChartStats.concat(wormBarChartStat)
+				// title = 'Mean Counts ' + fluorescence
+				// wormBarChartStat = wormBarChart(objectCountDataStats, 'name', 'numCount', 'Mean Counts', title, outputDir)
+				// wormBarChartStats = wormBarChartStats.concat(wormBarChartStat)
 			}
 		}
 
@@ -168,8 +169,8 @@ class SummaryExcel {
 				if (!measureData.isEmpty()) {
 					measureData.writeExcelSheet(workbook, "Measure_"+fluorescence)
 					def title = 'Mean Measure ' + fluorescence
-					wormBarChartStat = wormBarChart(measureData, 'Label', 'Mean', 'Mean Measure', title, outputDir)
-					wormBarChartStats = wormBarChartStats.concat(wormBarChartStat)
+					//wormBarChartStat = wormBarChart(measureData, 'Label', 'Mean', 'Mean Measure', title, outputDir)
+					//wormBarChartStats = wormBarChartStats.concat(wormBarChartStat)
 				}
 			} catch (GLDataframeException e) {
 				logger.error("ERROR: SummaryExcel.processDirectory ${e.getMessage()}")
@@ -182,8 +183,8 @@ class SummaryExcel {
 			def fluorescenceName = objectCountDataStats[1]
 			statsData.writeExcelSheet(workbook, fluorescenceName)
 		}
-		wormBarChartStats = wormBarChartStats.sortBy(['chart','name'])
-		wormBarChartStats = wormBarChartStats.cols(['chart', 'name','mean', 'stdDev'])
+		// wormBarChartStats = wormBarChartStats.sortBy(['chart','name'])
+		// wormBarChartStats = wormBarChartStats.cols(['chart', 'name','mean', 'stdDev'])
 		wormBarChartStats.writeExcelSheet(workbook, "Chart Stats")
 		
 		// Write the workbook to the output file
@@ -196,8 +197,8 @@ class SummaryExcel {
 
     private sortDataframeByCounts(threeDOCData) {
 		logger.trace("START SummaryExcel.sortDataframeByCounts")
-        def groupNamesMap  = ['ev':'ev','fa':'fat-7','pc':'pcyt','sa':'sams','ar':'arf','ir':'ire','xb':'xbp']
-        def groupNamesKeys = groupNamesMap.keySet()
+        //def groupNamesMap  = ['EV':'EV','ev':'ev','fa':'fat-7','pc':'pcyt','sa':'sams','ar':'arf','ir':'ire','xb':'xbp']
+        //def groupNamesKeys = groupNamesMap.keySet()
 
         def sortHeadersByCounts = { dataframe ->
             def GLDataframe countsDF = dataframe.colCounts()
@@ -209,30 +210,37 @@ class SummaryExcel {
         }
 
         def GLDataframe resultsDF = new GLDataframe()
-        groupNamesKeys.each { key ->
-            // Given a key find all the related column names in the given dataframe
-            def found = threeDOCData.colHeader.findAll { it.startsWith(key) }
-            if (!found.isEmpty()) {
-                // Create a new Dataframe with only those columns
-                def foundDF = threeDOCData.cols(found)
-                // Sort the dataframe by column count (how many item in each column)
-                def sortedDF = sortHeadersByCounts(foundDF)
-                // Append the sorted data to the results dataframe
-                resultsDF = resultsDF.join(sortedDF)
-            }
-        }
+		// By pass the mess below not sure what it is used for
+		def sortedDF = sortHeadersByCounts(threeDOCData)
+        resultsDF = resultsDF.join(sortedDF)
+
+        // groupNamesKeys.each { key ->
+        //     // Given a key find all the related column names in the given dataframe
+        //     def found = threeDOCData.colHeader.findAll { it.startsWith(key) }
+        //     if (!found.isEmpty()) {
+        //         // Create a new Dataframe with only those columns
+        //         def foundDF = threeDOCData.cols(found)
+        //         // Sort the dataframe by column count (how many item in each column)
+        //         def sortedDF = sortHeadersByCounts(foundDF)
+        //         // Append the sorted data to the results dataframe
+        //         resultsDF = resultsDF.join(sortedDF)
+        //     }
+        // }
+
 		logger.trace("FINISH SummaryExcel.sortDataframeByCounts")
         return resultsDF
     }
 		
 	// Given a directory of CSV files 
-	// apply readFirstColumnValuesFromCSV to each file
+	// read Nb of obj. voxels to each file
 	// sort the results by columnName before returning
 	private readDirectoryOfObjectCountCSVs(String directoryName) {
 		logger.trace("START SummaryExcel.readDirectoryOfObjectCountCSVs")
-	    def flouresence_type = directoryName[-3..-1]
-	    def left_trim = 15
-	    def right_trim = (flouresence_type=="488") ? -15 : -13 // flouresence_type=="561"
+	    //def flouresence_type = directoryName[-3..-1]
+	    //def right_trim = (flouresence_type=="488") ? -15 : -13 // flouresence_type=="561"
+
+	    def left_trim = 15 //Remove "Statistics_WTH_" from the name
+	    def right_trim = -5 //Remove ".csv" from name
 
 	    def csvFiles = (new File(directoryName)).listFiles()        
 	
@@ -245,10 +253,12 @@ class SummaryExcel {
 	    csvFiles.each { csvFile ->
 	    	if (csvFile.name.endsWith('.csv')) {
 		        def columnName = csvFile.name[left_trim..right_trim]
-				// Read the first column of the CSV file only usecols=[0] 
+				//logger.log("csvFile.name $csvFile.name columnName: $columnName  left_trim $left_trim right_trim $right_trim ")
+				// Read the third column of the CSV file only usecols=[2] 
+
 				def csvFileNm = csvFile.toString()
 				def header=true
-				def usecols=[0]
+				def usecols=[2] //Nb of obj. voxels
 				def temp_df = GLDataframe.readCSV(csvFileNm, header, usecols)
 				temp_df.colHeader = [columnName]
 				result_df = result_df.join(temp_df)
@@ -282,7 +292,7 @@ class SummaryExcel {
 	    	logger.error("ERROR: SummaryExcel.wormBarChart Group On Column Name [" + groupOnCol + "] not found in [" + chartDataframe.getColHeader() + "]")
 	    	return new GLDataframe()
 	    }
-		// Add a column 'grpNm' the contents are the first to characters from ...
+		// Add a column 'grpNm' the contents are the first two characters from ...
 	    def chartDataframeWGrp = chartDataframe.addCol('grpNm',{row -> row[0].substring(groupOnColIdx, 2)})
 	
 	    def chartData = [] // Hold the rows of data for the Bar Chart
